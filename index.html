@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir New Citra Official - POS System</title>
+    <!-- Google Fonts: Inter & Outfit untuk tipografi premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 1. HALAMAN LOGIN TERPUSAT (TEMA MERAH & CATRA POS) -->
+    <div id="login-screen" class="login-container-centered">
+        <div class="login-card-centered">
+            <div class="login-card-header">
+                <div class="brand-badge">CATRA POS</div>
+                <h2 class="brand-main-title">New Citra Official</h2>
+                <p class="brand-main-subtitle">New Citra House - Indonesia</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="employee-select">Pilih Karyawan Aktif</label>
+                <div class="select-wrapper">
+                    <select id="employee-select">
+                        <option value="" disabled selected>Pilih Karyawan</option>
+                        <option value="1" data-role="Kasir">Andi (Kasir)</option>
+                        <option value="2" data-role="Kasir">Budi (Kasir)</option>
+                        <option value="3" data-role="Manager">Citra (Manager)</option>
+                    </select>
+                    <button class="scan-btn" title="Scan Barcode"><i class="fa-solid fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="pin-display">
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+            </div>
+            <p class="pin-hint">Masukkan PIN Karyawan (PIN: 123456 / 111111 / 888888)</p>
+            <div id="login-error-msg" class="login-error hidden">PIN salah, silakan coba lagi.</div>
+            <div class="pin-keyboard">
+                <button class="key-btn" data-key="1">1</button>
+                <button class="key-btn" data-key="2">2</button>
+                <button class="key-btn" data-key="3">3</button>
+                <button class="key-btn" data-key="4">4</button>
+                <button class="key-btn" data-key="5">5</button>
+                <button class="key-btn" data-key="6">6</button>
+                <button class="key-btn" data-key="7">7</button>
+                <button class="key-btn" data-key="8">8</button>
+                <button class="key-btn" data-key="9">9</button>
+                <button class="key-btn action-key" data-key="C">C</button>
+                <button class="key-btn" data-key="0">0</button>
+                <button class="key-btn action-key" data-key="backspace"><i class="fa-solid fa-delete-left"></i></button>
+            </div>
+        </div>
+    </div>
+    <!-- 2. APLIKASI UTAMA (DASHBOARD KASIR - SETELAH LOGIN) -->
+    <div id="main-app" class="main-container hidden">
+        
+        <!-- HEADER UTAMA -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="toggle-sidebar" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
+                <div class="header-info-box">
+                    <span class="info-title"><i class="fa-solid fa-chart-line"></i> Ringkasan Hari Ini:</span>
+                    <span class="info-value">Total Penjualan: <strong id="header-total-penjualan">Rp 0</strong></span>
+                    <span class="info-divider">|</span>
+                    <span class="info-value">Total Profit: <strong id="header-total-profit">Rp 0</strong></span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="app-title-badge">KASIR MINI STOK</div>
+            </div>
+            <div class="header-right">
+                <span class="version-tag">Versi 1.7.5 <i class="fa-solid fa-circle-info"></i></span>
+                <div id="connection-status" class="status-badge"><span class="status-dot online"></span> Online</div>
+                <div id="clock" class="header-clock">00:00:00</div>
+            </div>
+        </header>
+        <div class="workspace">
+            <!-- SIDEBAR NAVIGASI -->
+            <aside id="app-sidebar" class="sidebar">
+                <div class="user-profile">
+                    <div class="profile-avatar" id="user-avatar-initial">N</div>
+                    <div class="profile-details">
+                        <h4 class="profile-name" id="user-display-name">New Citra Official</h4>
+                        <p class="profile-role" id="user-display-role">Kasir New Citra House</p>
+                        <div class="user-id-badge">
+                            <span>ID Pelanggan: <strong id="user-display-id">#0255781</strong></span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('#0255781')" title="Salin ID"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item active" data-target="page-kasir">
+                            <i class="fa-solid fa-cash-register"></i> <span>Kasir</span>
+                        </li>
+                        <li class="nav-item" data-target="page-penjualan">
+                            <i class="fa-solid fa-receipt"></i> <span>Penjualan</span>
+                        </li>
+                        <li class="nav-item" data-target="page-absensi">
+                            <i class="fa-solid fa-user-clock"></i> <span>Absensi</span>
+                        </li>
+                        <li class="nav-item" data-target="page-laporan">
+                            <i class="fa-solid fa-chart-pie"></i> <span>Laporan</span>
+                        </li>
+                        <li class="nav-item" data-target="page-pengaturan">
+                            <i class="fa-solid fa-sliders"></i> <span>Pengaturan</span>
+                        </li>
+                        <li class="nav-item close-cashier-btn" id="btn-tutup-kasir-sidebar">
+                            <i class="fa-solid fa-box-archive"></i> <span>Tutup Kasir</span>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="logout-btn" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar Kasir</button>
+                </div>
+            </aside>
+            <!-- KONTEN HALAMAN UTAMA -->
+            <main class="content-area">
+                <!-- TAB 1: HALAMAN KASIR (POS & TRANSAKSI) -->
+                <section id="page-kasir" class="page-section active">
+                    <div class="kasir-layout">
+                        <!-- Bagian Kiri: Info Toko & Menu Grid / Katalog Produk -->
+                        <div class="kasir-left">
+                            <div class="outlet-card">
+                                <div class="outlet-logo">Catra</div>
+                                <div class="outlet-info">
+                                    <h3 id="outlet-display-name">New Citra Indonesia</h3>
+                                    <p id="outlet-display-address">Jl. Kedungmundu Raya No 161A, Sendangguwo, Tembalang, Semarang Jawa Tengah 50273..</p>
+                                </div>
+                                <button class="edit-outlet-btn" id="btn-edit-outlet-shortcut" title="Edit Profil Outlet"><i class="fa-solid fa-pen"></i></button>
+                            </div>
+                            <!-- Grid Pintasan Menu Aksi Awal -->
+                            <div class="action-shortcut-grid">
+                                <button class="shortcut-card active" id="shortcut-produk">
+                                    <div class="shortcut-icon"><i class="fa-solid fa-box"></i></div>
+                                    <span>Produk</span>
+                                </button>
+                                <button class="shortcut-card" id="shortcut-tambah-produk">
+                                    <div class="shortcut-icon"><i class="fa-solid fa-folder-plus"></i></div>
+                                    <span>Tambah Produk</span>
+                                </button>
+                                <button class="shortcut-card" id="shortcut-riwayat">
+                                    <div class="shortcut-icon"><i class="fa-solid fa-history"></i></div>
+                                    <span>Riwayat</span>
+                                </button>
+                                <button class="shortcut-card" id="shortcut-pengeluaran">
+                                    <div class="shortcut-icon"><i class="fa-solid fa-wallet"></i></div>
+                                    <span>Pengeluaran Kas</span>
+                                </button>
+                                <button class="shortcut-card" id="shortcut-laporan">
+                                    <div class="shortcut-icon"><i class="fa-solid fa-chart-simple"></i></div>
+                                    <span>Laporan</span>
+                                </button>
+                                <button class="shortcut-card" id="shortcut-pengaturan">
+                                    <div class="shortcut-icon"><i class="fa-solid fa-gear"></i></div>
+                                    <span>Pengaturan</span>
+                                </button>
+                            </div>
+                            <!-- Katalog Produk -->
+                            <div class="product-catalog-section">
+                                <div class="catalog-header">
+                                    <div class="search-box">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="product-search" placeholder="Cari nama produk atau SKU...">
+                                    </div>
+                                    <div class="category-filter">
+                                        <select id="product-category-select">
+                                            <option value="all">Semua Kategori</option>
+                                            <option value="Makanan">Makanan</option>
+                                            <option value="Minuman">Minuman</option>
+                                            <option value="Barang">Barang Umum</option>
+                                            <option value="Jasa">Jasa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Grid Produk -->
+                                <div class="products-grid" id="products-container">
+                                    <!-- Produk di-render dinamis oleh JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Bagian Kanan: Keranjang Belanja (Daftar Order) -->
+                        <div class="kasir-right">
+                            <div class="order-panel">
+                                <div class="order-header">
+                                    <h3>Daftar Order</h3>
+                                    <span class="order-qty-badge" id="cart-item-count">0 Item</span>
+                                </div>
+                                <!-- List Order / Keranjang -->
+                                <div class="order-items-container" id="cart-container">
+                                    <!-- Tampilan jika keranjang kosong -->
+                                    <div class="empty-order-state" id="cart-empty-state">
+                                        <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/100/external-receipt-pack-flat-linear-illy-cafe.png" alt="No Order" class="empty-img">
+                                        <h4>Belum Ada Pesanan</h4>
+                                        <p>Silakan klik produk di sebelah kiri untuk menambah ke keranjang belanja.</p>
+                                    </div>
+                                    <!-- Daftar Item Belanja (Dinamis) -->
+                                    <div class="cart-items-list hidden" id="cart-items-list"></div>
+                                </div>
+                                <!-- Ringkasan Biaya -->
+                                <div class="order-summary">
+                                    <div class="summary-row">
+                                        <span>Subtotal</span>
+                                        <span id="cart-subtotal">Rp 0</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Pajak (11%)</span>
+                                        <span id="cart-tax">Rp 0</span>
+                                    </div>
+                                    <div class="summary-row total-row">
+                                        <span>Total</span>
+                                        <span id="cart-total">Rp 0</span>
+                                    </div>
+                                    <button class="checkout-btn" id="btn-checkout" disabled>
+                                        <span>Bayar / Transaksi</span>
+                                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 2: HALAMAN RIWAYAT PENJUALAN -->
+                <section id="page-penjualan" class="page-section hidden">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-receipt"></i> Riwayat Penjualan</h2>
+                            <div class="header-actions">
+                                <div class="search-box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="sales-search" placeholder="Cari No Transaksi...">
+                                </div>
+                                <button class="btn btn-secondary" id="btn-export-sales"><i class="fa-solid fa-file-excel"></i> Ekspor</button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>No Transaksi</th>
+                                        <th>Waktu</th>
+                                        <th>Kasir</th>
+                                        <th>Metode</th>
+                                        <th>Status</th>
+                                        <th>Total Pembayaran</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sales-table-body">
+                                    <!-- Diisi dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 3: HALAMAN ABSENSI -->
+                <section id="page-absensi" class="page-section hidden">
+                    <div class="absensi-layout">
+                        <!-- Panel Aksi Absen -->
+                        <div class="absensi-card card-action">
+                            <div class="card-header-premium">
+                                <h3><i class="fa-solid fa-user-clock"></i> Portal Absensi Karyawan</h3>
+                                <p>Silakan pilih nama Anda dan lakukan absensi masuk atau pulang.</p>
+                            </div>
+                            <div class="absensi-body">
+                                <div class="form-group">
+                                    <label for="absensi-employee-select">Pilih Karyawan</label>
+                                    <select id="absensi-employee-select" class="form-control">
+                                        <option value="" disabled selected>Pilih Karyawan</option>
+                                        <option value="Andi">Andi (Kasir)</option>
+                                        <option value="Budi">Budi (Kasir)</option>
+                                        <option value="Citra">Citra (Manager)</option>
+                                    </select>
+                                </div>
+                                <div class="datetime-display">
+                                    <h2 id="absen-clock-time">00:00:00</h2>
+                                    <p id="absen-clock-date">Kamis, 02 Juli 2026</p>
+                                </div>
+                                <div class="absensi-btn-group">
+                                    <button class="btn btn-primary btn-lg" id="btn-absen-masuk">
+                                        <i class="fa-solid fa-right-to-bracket"></i> Absen Masuk (Clock In)
+                                    </button>
+                                    <button class="btn btn-danger btn-lg" id="btn-absen-pulang">
+                                        <i class="fa-solid fa-right-from-bracket"></i> Absen Pulang (Clock Out)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Panel Log Absensi Hari Ini -->
+                        <div class="absensi-card card-log">
+                            <div class="card-header-premium">
+                                <h3>Riwayat Absensi Hari Ini</h3>
+                            </div>
+                            <div class="absensi-log-container">
+                                <table class="data-table small-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Karyawan</th>
+                                            <th>Jam Masuk</th>
+                                            <th>Jam Pulang</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="absensi-table-body">
+                                        <!-- Diisi dinamis -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 4: HALAMAN LAPORAN -->
+                <section id="page-laporan" class="page-section hidden">
+                    <div class="laporan-tabs-container">
+                        <!-- Sub-tab Selector -->
+                        <div class="sub-tab-headers">
+                            <button class="sub-tab-btn active" data-sub="sub-laporan-kasir">Laporan Kasir</button>
+                            <button class="sub-tab-btn" data-sub="sub-laporan-kas-flow">Laporan Kas Kasir (Mutasi Kas)</button>
+                        </div>
+                        <!-- Sub-tab 1: Laporan Kasir -->
+                        <div id="sub-laporan-kasir" class="sub-tab-content active">
+                            <div class="section-card no-border">
+                                <div class="section-header">
+                                    <h3>Catatan Sesi Kasir</h3>
+                                    <div class="date-filter">
+                                        <span class="filter-label">Filter:</span>
+                                        <select id="laporan-kasir-filter">
+                                            <option value="today">Hari Ini</option>
+                                            <option value="all">Semua Sesi</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Waktu Buka</th>
+                                                <th>Kasir</th>
+                                                <th>Waktu Tutup</th>
+                                                <th>Kas Awal</th>
+                                                <th>Kas Akhir (Sistem)</th>
+                                                <th>Penjualan Bersih</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="laporan-kasir-table-body">
+                                            <!-- Diisi dinamis -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sub-tab 2: Laporan Kas Kasir (Pemasukan / Pengeluaran) -->
+                        <div id="sub-laporan-kas-flow" class="sub-tab-content hidden">
+                            <div class="laporan-kas-layout">
+                                <!-- Form Input Kas Masuk/Keluar -->
+                                <div class="kas-drawer-form-card">
+                                    <h4>Input Uang Masuk / Keluar Kas</h4>
+                                    <form id="cash-movement-form">
+                                        <div class="form-group">
+                                            <label for="cash-move-type">Tipe Mutasi</label>
+                                            <select id="cash-move-type" class="form-control" required>
+                                                <option value="pemasukan">Kas Masuk (Pemasukan)</option>
+                                                <option value="pengeluaran">Kas Keluar (Pengeluaran)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cash-move-amount">Nominal Uang (Rp)</label>
+                                            <input type="number" id="cash-move-amount" class="form-control" placeholder="Contoh: 50000" min="1" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cash-move-note">Keterangan / Keperluan</label>
+                                            <textarea id="cash-move-note" class="form-control" rows="3" placeholder="Contoh: Pembelian sapu lidi kantor atau isi modal kas awal" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block">Simpan Catatan Kas</button>
+                                    </form>
+                                </div>
+                                <!-- Tabel Catatan Kas -->
+                                <div class="kas-drawer-list-card">
+                                    <div class="list-header">
+                                        <h4>Catatan Kas Drawer (Kasir Aktif)</h4>
+                                        <div class="kas-summary-badges">
+                                            <div class="kas-badge in">Masuk: <span id="summary-kas-in">Rp 0</span></div>
+                                            <div class="kas-badge out">Keluar: <span id="summary-kas-out">Rp 0</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="data-table small-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Waktu</th>
+                                                    <th>Tipe</th>
+                                                    <th>Nominal</th>
+                                                    <th>Keterangan</th>
+                                                    <th>Operator</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="cash-flow-table-body">
+                                                <!-- Diisi dinamis -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 5: HALAMAN PENGATURAN -->
+                <section id="page-pengaturan" class="page-section hidden">
+                    <div class="pengaturan-layout">
+                        <!-- Sidebar Pengaturan -->
+                        <div class="pengaturan-sidebar">
+                            <ul class="settings-menu">
+                                <li class="settings-menu-item active" data-settings-target="set-info-outlet">
+                                    <i class="fa-solid fa-shop"></i> Info Outlet & Toko
+                                </li>
+                                <li class="settings-menu-item" data-settings-target="set-toko-online">
+                                    <i class="fa-solid fa-globe"></i> Toko Online (Integrasi)
+                                </li>
+                                <li class="settings-menu-item" data-settings-target="set-struk-biaya">
+                                    <i class="fa-solid fa-receipt"></i> Struk & Biaya (Pajak)
+                                </li>
+                                <li class="settings-menu-item" data-settings-target="set-akun-keamanan">
+                                    <i class="fa-solid fa-lock"></i> Kata Sandi & PIN
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- Konten Pengaturan -->
+                        <div class="pengaturan-content">
+                            <!-- Pengaturan 1: Info Outlet -->
+                            <div id="set-info-outlet" class="settings-pane active">
+                                <h3>Pengaturan Info Outlet</h3>
+                                <p>Sesuaikan informasi toko fisik New Citra Indonesia Anda di sini. Info ini akan dicetak langsung pada struk penjualan.</p>
+                                <form id="settings-outlet-form" class="mt-4">
+                                    <div class="form-group">
+                                        <label for="set-outlet-name">Nama Toko / Outlet</label>
+                                        <input type="text" id="set-outlet-name" class="form-control" value="New Citra Indonesia">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-outlet-address">Alamat Toko</label>
+                                        <textarea id="set-outlet-address" class="form-control" rows="3">Jl. Kedungmundu Raya No 161A, Sendangguwo, Tembalang, Semarang Jawa Tengah 50273..</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-outlet-phone">Nomor Telepon Toko</label>
+                                        <input type="text" id="set-outlet-phone" class="form-control" value="0812-3456-7890">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Simpan Info Outlet</button>
+                                </form>
+                            </div>
+                            <!-- Pengaturan 2: Toko Online -->
+                            <div id="set-toko-online" class="settings-pane hidden">
+                                <h3>Status Toko Online (E-Commerce)</h3>
+                                <p>Integrasi POS dengan layanan pihak ketiga Anda.</p>
+                                
+                                <div class="settings-item-row mt-4">
+                                    <div class="item-info">
+                                        <h5>Buka Tutup Sementara</h5>
+                                        <p>Matikan pesanan masuk sementara waktu dari web e-commerce.</p>
+                                    </div>
+                                    <div class="item-control">
+                                        <button class="btn btn-secondary">Atur Status &gt;</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="settings-item-row">
+                                    <div class="item-info">
+                                        <h5>Toko Online</h5>
+                                        <p>Integrasikan keranjang belanja dengan link pemesanan online.</p>
+                                    </div>
+                                    <div class="item-control">
+                                        <span class="status-badge-green">Aktif & Digunakan</span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="settings-item-row">
+                                    <div class="item-info">
+                                        <h5>Integrasi GrabFood / GoFood</h5>
+                                        <p>Sinkronisasi inventaris stok langsung dengan sistem layanan ojek online.</p>
+                                    </div>
+                                    <div class="item-control">
+                                        <span class="status-badge-gray">Belum Terintegrasi</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Pengaturan 3: Struk & Pajak -->
+                            <div id="set-struk-biaya" class="settings-pane hidden">
+                                <h3>Struk & Biaya Layanan</h3>
+                                <div class="form-group mt-4">
+                                    <label for="set-tax-rate">Persentase Pajak (%)</label>
+                                    <input type="number" id="set-tax-rate" class="form-control" value="11" min="0" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="set-receipt-footer">Catatan Kaki Struk (Footer)</label>
+                                    <input type="text" id="set-receipt-footer" class="form-control" value="Terima Kasih Atas Kunjungan Anda!">
+                                </div>
+                                <button id="btn-save-struk-settings" class="btn btn-primary">Simpan Pengaturan Struk</button>
+                            </div>
+                            <!-- Pengaturan 4: PIN & Keamanan -->
+                            <div id="set-akun-keamanan" class="settings-pane hidden">
+                                <h3>Ubah Sandi & PIN Karyawan</h3>
+                                <p>Ubah PIN default untuk mencegah akses tidak sah ke kasir.</p>
+                                <form id="settings-pin-form" class="mt-4">
+                                    <div class="form-group">
+                                        <label for="select-employee-pin">Pilih Karyawan</label>
+                                        <select id="select-employee-pin" class="form-control">
+                                            <option value="1">Andi</option>
+                                            <option value="2">Budi</option>
+                                            <option value="3">Citra</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-new-pin">Masukkan PIN Baru (6 Digit Angka)</label>
+                                        <input type="password" id="set-new-pin" class="form-control" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Simpan PIN Baru</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <!-- ==========================================
+         MODAL WINDOWS & POPUPS
+         ========================================== -->
+    <!-- A. MODAL MANAJEMEN PRODUK (CRUD) -->
+    <div id="modal-product" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-product-title">Tambah Produk Baru</h3>
+                <button class="close-modal-btn" id="btn-close-product-modal">&times;</button>
+            </div>
+            <form id="product-form">
+                <input type="hidden" id="form-product-index">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="prod-name">Nama Produk</label>
+                        <input type="text" id="prod-name" class="form-control" required placeholder="Contoh: Roti Tawar Spesial">
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="prod-sku">SKU / Kode Barang</label>
+                            <input type="text" id="prod-sku" class="form-control" required placeholder="Contoh: NCO-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="prod-category">Kategori</label>
+                            <select id="prod-category" class="form-control" required>
+                                <option value="Makanan">Makanan</option>
+                                <option value="Minuman">Minuman</option>
+                                <option value="Barang">Barang Umum</option>
+                                <option value="Jasa">Jasa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="prod-stock">Stok Awal</label>
+                            <input type="number" id="prod-stock" class="form-control" required min="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="prod-price">Harga Jual (Rp)</label>
+                            <input type="number" id="prod-price" class="form-control" required min="0" placeholder="Contoh: 15000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="prod-img">Link Gambar Produk (Opsional)</label>
+                        <input type="url" id="prod-img" class="form-control" placeholder="Link Gambar (https://...) atau kosongkan untuk default">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-product">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-product">Simpan Produk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- B. MODAL PEMBAYARAN (CHECKOUT) -->
+    <div id="modal-payment" class="modal hidden">
+        <div class="modal-content modal-medium">
+            <div class="modal-header">
+                <h3>Selesaikan Pembayaran</h3>
+                <button class="close-modal-btn" id="btn-close-payment-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-summary">
+                    <span>Total Tagihan:</span>
+                    <h2 id="payment-total-amount">Rp 0</h2>
+                </div>
+                <!-- Pilihan Metode Pembayaran -->
+                <div class="payment-methods-grid">
+                    <button class="payment-method-card active" data-method="Tunai">
+                        <div class="method-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        <span>Uang Tunai (Cash)</span>
+                    </button>
+                    <button class="payment-method-card" data-method="Bank">
+                        <div class="method-icon"><i class="fa-solid fa-credit-card"></i></div>
+                        <span>Transfer Bank / VA</span>
+                    </button>
+                    <button class="payment-method-card" data-method="QRIS">
+                        <div class="method-icon"><i class="fa-solid fa-qrcode"></i></div>
+                        <span>QRIS / E-Wallet</span>
+                    </button>
+                </div>
+                <!-- Bagian Dinamis 1: Bayar Uang Tunai -->
+                <div id="payment-cash-section" class="payment-detail-section">
+                    <div class="form-group">
+                        <label for="cash-given-input">Jumlah Uang Diterima (Tunai)</label>
+                        <input type="number" id="cash-given-input" class="form-control form-control-lg" placeholder="Masukkan jumlah pembayaran..." required>
+                    </div>
+                    <!-- Tombol Cepat Nominal Uang Pas / Bulat -->
+                    <div class="cash-quick-buttons">
+                        <button class="btn btn-outline" id="btn-cash-pas">Uang Pas</button>
+                        <button class="btn btn-outline" data-amount="10000">10k</button>
+                        <button class="btn btn-outline" data-amount="20000">20k</button>
+                        <button class="btn btn-outline" data-amount="50000">50k</button>
+                        <button class="btn btn-outline" data-amount="100000">100k</button>
+                    </div>
+                    <div class="change-display mt-4">
+                        <span>Kembalian:</span>
+                        <h3 id="cash-change-amount" class="text-green">Rp 0</h3>
+                    </div>
+                </div>
+                <!-- Bagian Dinamis 2: Transfer Bank -->
+                <div id="payment-bank-section" class="payment-detail-section hidden">
+                    <div class="alert alert-info">
+                        <p><i class="fa-solid fa-circle-info"></i> Silakan arahkan pembeli untuk transfer ke rekening outlet berikut:</p>
+                        <ul class="bank-list-details">
+                            <li><strong>Bank BCA:</strong> 8901234567 a/n New Citra Indonesia</li>
+                            <li><strong>Bank Mandiri:</strong> 123000987654 a/n New Citra Indonesia</li>
+                        </ul>
+                        <p class="mt-2">Pastikan mutasi transfer masuk ke rekening Anda sebelum menyelesaikan transaksi ini.</p>
+                    </div>
+                </div>
+                <!-- Bagian Dinamis 3: QRIS -->
+                <div id="payment-qris-section" class="payment-detail-section hidden">
+                    <div class="qris-payment-box">
+                        <div class="qris-header">
+                            <span class="qris-logo">QRIS</span>
+                            <span class="gpn-logo">GPN</span>
+                        </div>
+                        <!-- QR Code Generator Mockup -->
+                        <div class="qris-qrcode">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=NewCitraPOS" alt="QRIS QR Code" id="qris-img-mock">
+                        </div>
+                        <p class="qris-footer-text">PINDAI DENGAN APLIKASI PEMBAYARAN APAPUN (OVO, GoPay, Dana, ShopeePay, M-Banking)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-payment">Batalkan</button>
+                <button class="btn btn-success btn-lg" id="btn-submit-payment" disabled>Selesaikan & Cetak Struk</button>
+            </div>
+        </div>
+    </div>
+    <!-- C. MODAL STRUK BELANJA (PREVIEW CETAK & RESI) -->
+    <div id="modal-receipt" class="modal hidden">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Struk Belanja & Transaksi Selesai</h3>
+                <button class="close-modal-btn" id="btn-close-receipt-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Tampilan Kertas Struk Termal POS -->
+                <div class="receipt-paper" id="receipt-print-area">
+                    <div class="receipt-header">
+                        <h2 class="receipt-store-name" id="receipt-store-name">New Citra Indonesia</h2>
+                        <p class="receipt-store-address" id="receipt-store-address">Jl. Kedungmundu Raya No 161A, Semarang</p>
+                        <p class="receipt-store-phone" id="receipt-store-phone">Telp: 0812-3456-7890</p>
+                        <div class="receipt-divider">------------------------------------------</div>
+                    </div>
+                    
+                    <div class="receipt-meta">
+                        <p>No Resi: <strong id="receipt-resi-num">TX-20260702-0001</strong></p>
+                        <p>Waktu: <span id="receipt-date">02/07/2026 07:55:00</span></p>
+                        <p>Kasir: <span id="receipt-cashier-name">Andi (Kasir)</span></p>
+                        <p>Metode: <span id="receipt-method">Tunai</span></p>
+                        <div class="receipt-divider">------------------------------------------</div>
+                    </div>
+                    <div class="receipt-items-list" id="receipt-items-list">
+                        <!-- List Item dicetak dinamis -->
+                    </div>
+                    <div class="receipt-divider">------------------------------------------</div>
+                    <div class="receipt-totals">
+                        <div class="receipt-total-row">
+                            <span>Subtotal</span>
+                            <span id="receipt-subtotal">Rp 0</span>
+                        </div>
+                        <div class="receipt-total-row">
+                            <span>Pajak (11%)</span>
+                            <span id="receipt-tax">Rp 0</span>
+                        </div>
+                        <div class="receipt-total-row receipt-grand-total">
+                            <span>TOTAL</span>
+                            <span id="receipt-total">Rp 0</span>
+                        </div>
+                        <div class="receipt-divider">------------------------------------------</div>
+                        <div class="receipt-total-row">
+                            <span>Bayar</span>
+                            <span id="receipt-paid">Rp 0</span>
+                        </div>
+                        <div class="receipt-total-row">
+                            <span>Kembalian</span>
+                            <span id="receipt-change">Rp 0</span>
+                        </div>
+                    </div>
+                    <div class="receipt-footer">
+                        <div class="receipt-divider">------------------------------------------</div>
+                        <p id="receipt-footer-msg">Terima Kasih Atas Kunjungan Anda!</p>
+                        <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-close-receipt-bottom">Selesai (Tutup)</button>
+                <button class="btn btn-primary" id="btn-print-receipt-action"><i class="fa-solid fa-print"></i> Cetak Struk / PDF</button>
+            </div>
+        </div>
+    </div>
+    <!-- D. MODAL TUTUP KASIR -->
+    <div id="modal-tutup-kasir" class="modal hidden">
+        <div class="modal-content modal-medium">
+            <div class="modal-header">
+                <h3>Formulir Tutup Sesi Kasir</h3>
+                <button class="close-modal-btn" id="btn-close-tutup-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <p><i class="fa-solid fa-triangle-exclamation"></i> Menutup sesi kasir akan merekap seluruh penjualan Anda hari ini dan mengunci sesi aktif ini.</p>
+                </div>
+                
+                <div class="session-summary-grid mt-3">
+                    <div class="summary-item">
+                        <span>Waktu Sesi Dibuka</span>
+                        <strong id="session-open-time">02 Juli 2026 07:54</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Kas Awal</span>
+                        <strong id="session-cash-start">Rp 200,000</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Penjualan</span>
+                        <strong id="session-total-sales" class="text-green">Rp 0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Kas Masuk (Mutasi)</span>
+                        <strong id="session-cash-in" class="text-green">Rp 0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Kas Keluar (Mutasi)</span>
+                        <strong id="session-cash-out" class="text-red">Rp 0</strong>
+                    </div>
+                    <div class="summary-itemHighlight">
+                        <span>Estimasi Kas di Laci</span>
+                        <strong id="session-expected-cash">Rp 200,000</strong>
+                    </div>
+                </div>
+                <form id="tutup-kasir-form" class="mt-4">
+                    <div class="form-group">
+                        <label for="actual-cash-input">Masukkan Total Uang Fisik Di Laci (Rp)</label>
+                        <input type="number" id="actual-cash-input" class="form-control form-control-lg" placeholder="Masukkan jumlah uang fisik di laci..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="session-closing-note">Catatan Penutupan Sesi (Opsional)</label>
+                        <textarea id="session-closing-note" class="form-control" rows="2" placeholder="Tulis catatan jika ada selisih kas drawer..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-block btn-lg mt-3">Konfirmasi & Tutup Kasir Sekarang</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+    
+    <!-- Menghubungkan Logika Bisnis JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
+

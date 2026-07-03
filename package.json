@@ -1,0 +1,22 @@
+{
+  "name": "kasir-newcitra-pos",
+  "version": "1.7.5",
+  "description": "Sistem Kasir POS New Citra Indonesia - Backend Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "pos",
+    "kasir",
+    "newcitra"
+  ],
+  "author": "New Citra Indonesia",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.21.2",
+    "mysql2": "^3.22.5"
+  }
+}
